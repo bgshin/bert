@@ -98,7 +98,7 @@ class TokenizationTest(tf.test.TestCase):
 
     self.assertAllEqual(
         tokenization.convert_tokens_to_ids(
-            vocab, ["un", "##want", "##ed", "runn", "##ing"]), [7, 4, 5, 8, 9])
+            vocab, ["un", "##want", "##ed", "runn", "##ing"]), [7, 4, 5, 8, 9]) 
 
   def test_is_whitespace(self):
     self.assertTrue(tokenization._is_whitespace(u" "))
