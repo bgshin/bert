@@ -105,7 +105,7 @@ def get_model(token_num,
     model.compile(
         optimizer=keras.optimizers.Adam(lr=lr),
         loss='sparse_categorical_crossentropy',
-        metrics=[],
+        metrics=['accuracy'],
     )
     return model
 

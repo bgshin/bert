@@ -4,6 +4,7 @@ from src.keras_bert import load_trained_model_from_checkpoint
 import cPickle
 import keras
 import os
+from keras.callbacks import ModelCheckpoint
 
 
 class Timer(object):
@@ -55,12 +56,18 @@ def run(basepath, bert_type, task):
     #           batch_size=6,
     #           epochs=50)
 
+    filename = "%s/k-%s-{epoch:02d}-{val_acc:.2f}.hdf5" % (data_dir, bert_type)
+    checkpoint = ModelCheckpoint(filename, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    callbacks_list = [checkpoint]
+
     model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
               batch_size=6,
               epochs=50,
               validation_data=([xid_dev, xseg_dev, xmask_dev], y_dev),
+              callbacks=callbacks_list
               )
 
+    
 
 
 if __name__=='__main__':
