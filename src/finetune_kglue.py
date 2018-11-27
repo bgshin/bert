@@ -5,6 +5,8 @@ import cPickle
 import keras
 import os
 from keras.callbacks import ModelCheckpoint
+import keras.backend.tensorflow_backend as ktf
+import tensorflow as tf
 
 
 class Timer(object):
@@ -67,7 +69,7 @@ def run(basepath, bert_type, task):
               callbacks=callbacks_list
               )
 
-    
+
 
 
 if __name__=='__main__':
@@ -82,5 +84,15 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.g
+
+
+    def get_session(gpu_fraction=1):
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction,
+                                    allow_growth=True)
+        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
+
+    ktf.set_session(get_session())
+
 
     run(args.p, args.b, args.t)
