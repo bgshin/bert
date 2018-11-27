@@ -21,6 +21,7 @@ def gelu(x):
 
 
 def get_model(token_num,
+              n_class=2,
               pos_num=512,
               seq_len=512,
               embed_dim=768,
@@ -83,29 +84,27 @@ def get_model(token_num,
         )
     if not training:
         return inputs[:2], transformed
-    mlm_dense_layer = keras.layers.Dense(
-        units=embed_dim,
-        activation=feed_forward_activation,
-        name='MLM-Dense',
-    )(transformed)
-    mlm_norm_layer = LayerNormalization(name='MLM-Norm')(mlm_dense_layer)
-    mlm_pred_layer = EmbeddingSimilarity(name='MLM-Sim')([mlm_norm_layer, embed_weights])
-    masked_layer = Masked(name='MLM')([mlm_pred_layer, inputs[-1]])
+
     extract_layer = Extract(index=0, name='Extract')(transformed)
-    nsp_dense_layer = keras.layers.Dense(
+
+    pooled_layer = keras.layers.Dense(
         units=embed_dim,
         activation='tanh',
-        name='NSP-Dense',
+        name='Pooler-Dense',
     )(extract_layer)
-    nsp_pred_layer = keras.layers.Dense(
-        units=2,
+
+    pooled_layer = keras.layers.Dropout(0.9)(pooled_layer)
+
+    pred_layer = keras.layers.Dense(
+        units=n_class,
         activation='softmax',
-        name='NSP',
-    )(nsp_dense_layer)
-    model = keras.models.Model(inputs=inputs, outputs=[masked_layer, nsp_pred_layer])
+        name='LOSS',
+    )(pooled_layer)
+
+    model = keras.models.Model(inputs=inputs, outputs=pred_layer)
     model.compile(
         optimizer=keras.optimizers.Adam(lr=lr),
-        loss=keras.losses.sparse_categorical_crossentropy,
+        loss='sparse_categorical_crossentropy',
         metrics=[],
     )
     return model

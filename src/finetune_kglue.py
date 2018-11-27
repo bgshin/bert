@@ -1,11 +1,6 @@
 import argparse
-import codecs
 import time
-import numpy as np
 from src.keras_bert import load_trained_model_from_checkpoint
-import collections
-import six
-import tensorflow as tf
 import cPickle
 import keras
 import os
@@ -33,9 +28,9 @@ def run(basepath, bert_type, task):
     do_lower_case = True if bert_type.split('_')[0] == 'uncased' else False
 
     with Timer('laod dataset...'):
-        # filename = '%s/trn.features.%s.cpkl' % (data_dir, bert_type)
-        # with open(filename, 'rb') as handle:
-        #     (xid_trn, xseg_trn, xmask_trn, y_trn, tokens_trn) = cPickle.load(handle)
+        filename = '%s/trn.features.%s.cpkl' % (data_dir, bert_type)
+        with open(filename, 'rb') as handle:
+            (xid_trn, xseg_trn, xmask_trn, y_trn, tokens_trn) = cPickle.load(handle)
 
         filename = '%s/dev.features.%s.cpkl' % (data_dir, bert_type)
         with open(filename, 'rb') as handle:
@@ -45,33 +40,40 @@ def run(basepath, bert_type, task):
         with open(filename, 'rb') as handle:
             (xid_tst, xseg_tst, xmask_tst, y_gold, tokens_tst) = cPickle.load(handle)
 
+    # n_class = max(y_trn)+1
+    n_class = max(y_dev)+1
+
     with Timer('loading from checkpt...'):
-        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True)
-    # model.summary(line_length=120)
-    model.summary()
+        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class)
+    model.summary(line_length=120)
 
-    # model.fit(x_trn, y_trn)
-    #
-    n_class = 2
+    y_trn = keras.utils.to_categorical(y_trn, n_class)
     y_dev = keras.utils.to_categorical(y_dev, n_class)
+    y_tst = keras.utils.to_categorical(y_gold, n_class)
 
+    # model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
+    #           batch_size=6,
+    #           epochs=50)
 
-    model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
+    model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
               batch_size=6,
-              epochs=50)
+              epochs=50,
+              validation_data=([xid_dev, xseg_dev, xmask_dev], y_dev),
+              )
 
 
-    # model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
-    #           batch_size=1000,
-    #           epochs=50,
-    #           validation_data=([xid_dev, xseg_dev, xmask_dev], y_dev))
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', default='../data')  # base path
+    parser.add_argument('-t', default='SST-2', type=str,
+                              choices=['CoLA', 'SST-2', 'MRPC', 'QQP', 'MNLI',
+                                       'QNLI', 'RTE', 'WNLI', 'SNLI', 'STS-B'])  # GLUE task type
     parser.add_argument('-b', default='cased_L-12_H-768_A-12',
-                        choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16'])  # bert model type
-    parser.add_argument('-g', default='1')  # gpunum
+                        choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16']) # bert model type
+    parser.add_argument('-g', default='0')  # gpunum
     args = parser.parse_args()
 
-    run(args.p, args.b, 'SST-2')
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.g
+
+    run(args.p, args.b, args.t)
