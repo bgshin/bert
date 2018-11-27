@@ -140,3 +140,119 @@ python distill_cnn.py
 17:49+23+36 = 108+17*60 =1128
 70042/1128 = 62.09it/s
 ```
+
+
+
+# Keras Bert Project
+
+```
+[Embedding]
+bert/embeddings/LayerNorm/beta -> Embedding-Norm
+bert/embeddings/LayerNorm/gamma -> Embedding-Norm
+bert/embeddings/position_embeddings -> Embedding-Position
+bert/embeddings/token_type_embeddings -> Embedding-Segment
+bert/embeddings/word_embeddings -> Embedding-Token
+
+[Encoder-%d-MultiHeadSelfAttention]
+bert/encoder/layer_0/attention/self/query/kernel
+bert/encoder/layer_0/attention/self/query/bias
+bert/encoder/layer_0/attention/self/key/kernel
+bert/encoder/layer_0/attention/self/key/bias
+bert/encoder/layer_0/attention/self/value/kernel
+bert/encoder/layer_0/attention/self/value/bias
+bert/encoder/layer_0/attention/output/dense/kernel
+bert/encoder/layer_0/attention/output/dense/bias
+
+
+[Encoder-%d-MultiHeadSelfAttention-Norm]
+bert/encoder/layer_0/attention/output/LayerNorm/gamma
+bert/encoder/layer_0/attention/output/LayerNorm/beta
+
+
+[Encoder-%d-FeedForward]
+bert/encoder/layer_0/intermediate/dense/kernel
+bert/encoder/layer_0/intermediate/dense/bias
+bert/encoder/layer_0/output/dense/kernel
+bert/encoder/layer_0/output/dense/bias
+
+[Encoder-%d-FeedForward-Norm]
+bert/encoder/layer_0/output/LayerNorm/gamma
+bert/encoder/layer_0/output/LayerNorm/beta
+
+...
+
+
+
+[MLM-Dense]
+cls/predictions/transform/dense/kernel
+cls/predictions/transform/dense/bias
+
+[MLM-Norm]
+cls/predictions/transform/LayerNorm/gamma
+cls/predictions/transform/LayerNorm/beta
+
+[MLM-Sim]
+cls/predictions/output_bias
+
+[NSP-Dense]
+bert/pooler/dense/kernel
+bert/pooler/dense/bias
+# We "pool" the model by simply taking the hidden state corresponding
+# to the first token. We assume that this has been pre-trained
+# result -> self.pooled_output
+
+[NSP]
+cls/seq_relationship/output_weights
+cls/seq_relationship/output_bias
+
+
+```
+
+## classifier
+
+* dropout(0.9)
+* crossentrophy(WX+b, y)
+
+
+
+
+* extimator.get_variable_names()
+
+```
+bert/loss/output_weights
+bert/loss/output_bias
+```
+
+
+
+
+
+### tf-version assignment_map
+
+```
+
+bert/embeddings/LayerNorm/beta: bert/embeddings/LayerNorm/beta
+bert/embeddings/LayerNorm/gamma: bert/embeddings/LayerNorm/gamma
+bert/embeddings/position_embeddings: bert/embeddings/position_embeddings
+bert/embeddings/token_type_embeddings: bert/embeddings/token_type_embeddings
+bert/embeddings/word_embeddings: bert/embeddings/word_embeddings
+bert/encoder/layer_0/attention/output/LayerNorm/beta: bert/encoder/layer_0/attention/output/LayerNorm/beta
+bert/encoder/layer_0/attention/output/LayerNorm/gamma: bert/encoder/layer_0/attention/output/LayerNorm/gamma
+bert/encoder/layer_0/attention/output/dense/bias: bert/encoder/layer_0/attention/output/dense/bias
+bert/encoder/layer_0/attention/output/dense/kernel: bert/encoder/layer_0/attention/output/dense/kernel
+bert/encoder/layer_0/attention/self/key/bias: bert/encoder/layer_0/attention/self/key/bias
+bert/encoder/layer_0/attention/self/key/kernel: bert/encoder/layer_0/attention/self/key/kernel
+bert/encoder/layer_0/attention/self/query/bias: bert/encoder/layer_0/attention/self/query/bias
+bert/encoder/layer_0/attention/self/query/kernel: bert/encoder/layer_0/attention/self/query/kernel
+bert/encoder/layer_0/attention/self/value/bias: bert/encoder/layer_0/attention/self/value/bias
+bert/encoder/layer_0/attention/self/value/kernel: bert/encoder/layer_0/attention/self/value/kernel
+bert/encoder/layer_0/intermediate/dense/bias: bert/encoder/layer_0/intermediate/dense/bias
+bert/encoder/layer_0/intermediate/dense/kernel: bert/encoder/layer_0/intermediate/dense/kernel
+bert/encoder/layer_0/output/LayerNorm/beta: bert/encoder/layer_0/output/LayerNorm/beta
+bert/encoder/layer_0/output/LayerNorm/gamma: bert/encoder/layer_0/output/LayerNorm/gamma
+bert/encoder/layer_0/output/dense/bias: bert/encoder/layer_0/output/dense/bias
+bert/encoder/layer_0/output/dense/kernel: bert/encoder/layer_0/output/dense/kernel
+...
+bert/pooler/dense/bias: bert/pooler/dense/bias
+bert/pooler/dense/kernel: bert/pooler/dense/kernel
+```

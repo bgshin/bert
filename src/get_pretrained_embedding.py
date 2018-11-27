@@ -60,7 +60,7 @@ def save_embedding(basepath, bert_type):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', default='../data')  # base path
-    parser.add_argument('-b', default='uncased_L-24_H-1024_A-16',
+    parser.add_argument('-b', default='cased_L-12_H-768_A-12',
                         choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16'])  # bert model type
     parser.add_argument('-g', default='1')  # gpunum
     args = parser.parse_args()
