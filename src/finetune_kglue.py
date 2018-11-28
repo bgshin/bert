@@ -60,22 +60,22 @@ class MyCallback(ModelCheckpoint):
             self.print_status()
 
 
-def run(basepath, bert_type, task):
+def run(basepath, bert_type, task, seq_len):
     data_dir = '%s/glue_data/%s' % (basepath, task)
     bert_dir = '%s/%s' % (basepath, bert_type)
     config_path = '%s/bert_config.json' % bert_dir
     checkpoint_path = '%s/bert_model.ckpt' % bert_dir
 
     with Timer('laod dataset...'):
-        filename = '%s/trn.features.%s.cpkl' % (data_dir, bert_type)
+        filename = '%s/trn.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
             (xid_trn, xseg_trn, xmask_trn, y_trn, tokens_trn) = cPickle.load(handle)
 
-        filename = '%s/dev.features.%s.cpkl' % (data_dir, bert_type)
+        filename = '%s/dev.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
             (xid_dev, xseg_dev, xmask_dev, y_dev, tokens_dev) = cPickle.load(handle)
 
-        filename = '%s/tst.features.%s.cpkl' % (data_dir, bert_type)
+        filename = '%s/tst.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
             (xid_tst, xseg_tst, xmask_tst, y_gold, tokens_tst) = cPickle.load(handle)
 
@@ -125,6 +125,7 @@ if __name__=='__main__':
     parser.add_argument('-b', default='cased_L-12_H-768_A-12',
                         choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16']) # bert model type
     parser.add_argument('-g', default='0')  # gpunum
+    parser.add_argument('-s', default=128, type=int)  # seqlen
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.g
@@ -139,4 +140,4 @@ if __name__=='__main__':
     ktf.set_session(get_session())
 
 
-    run(args.p, args.b, args.t)
+    run(args.p, args.b, args.t, args.s)

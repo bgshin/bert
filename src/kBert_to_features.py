@@ -613,15 +613,15 @@ def run(basepath, bert_type, task, seq_len = 512):
 
     y_gold = np.array(y_gold)
 
-    filename = '%s/trn.features.%s.cpkl' % (data_dir, bert_type)
+    filename = '%s/trn.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
     with open(filename, 'wb') as handle:
         cPickle.dump((xid_trn, xseg_trn, xmask_trn, y_trn, tokens_trn), handle)
 
-    filename = '%s/dev.features.%s.cpkl' % (data_dir, bert_type)
+    filename = '%s/dev.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
     with open(filename, 'wb') as handle:
         cPickle.dump((xid_dev, xseg_dev, xmask_dev, y_dev, tokens_dev), handle)
 
-    filename = '%s/tst.features.%s.cpkl' % (data_dir, bert_type)
+    filename = '%s/tst.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
     with open(filename, 'wb') as handle:
         cPickle.dump((xid_tst, xseg_tst, xmask_tst, y_gold, tokens_tst), handle)
 
@@ -632,6 +632,7 @@ if __name__=='__main__':
     parser.add_argument('-b', default='cased_L-12_H-768_A-12',
                         choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16'])  # bert model type
     parser.add_argument('-g', default='1')  # gpunum
+    parser.add_argument('-s', default=512, type=int)  # seqlen
     args = parser.parse_args()
 
-    run(args.p, args.b, 'SST-2', seq_len=512)
+    run(args.p, args.b, 'SST-2', seq_len=args.s)

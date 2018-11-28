@@ -5,14 +5,16 @@ import tensorflow as tf
 from .bert import get_model
 
 
-def load_trained_model_from_checkpoint(config_file, checkpoint_file, training=False, n_class=2):
+def load_trained_model_from_checkpoint(config_file, checkpoint_file, training=False, n_class=2, n_seq=512):
     with open(config_file, 'r') as reader:
         config = json.loads(reader.read())
     model = get_model(
         token_num=config['vocab_size'],
         n_class=n_class,
-        pos_num=config['max_position_embeddings'],
-        seq_len=config['max_position_embeddings'],
+        # pos_num=config['max_position_embeddings'],
+        # seq_len=config['max_position_embeddings'],
+        pos_num=n_seq,
+        seq_len=n_seq,
         embed_dim=config['hidden_size'],
         transformer_num=config['num_hidden_layers'],
         head_num=config['num_attention_heads'],
@@ -27,7 +29,7 @@ def load_trained_model_from_checkpoint(config_file, checkpoint_file, training=Fa
         tf.train.load_variable(checkpoint_file, 'bert/embeddings/word_embeddings'),
     ])
     model.get_layer(name='Embedding-Position').set_weights([
-        tf.train.load_variable(checkpoint_file, 'bert/embeddings/position_embeddings'),
+        tf.train.load_variable(checkpoint_file, 'bert/embeddings/position_embeddings')[:n_seq,:],
     ])
     model.get_layer(name='Embedding-Segment').set_weights([
         tf.train.load_variable(checkpoint_file, 'bert/embeddings/token_type_embeddings'),

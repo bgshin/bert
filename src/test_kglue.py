@@ -27,19 +27,20 @@ def run(basepath, bert_type, task):
     checkpoint_path = '%s/bert_model.ckpt' % bert_dir
 
     with Timer('laod dataset...'):
-        filename = '%s/dev.features.%s.cpkl' % (data_dir, bert_type)
+        filename = '%s/dev.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
             (xid_dev, xseg_dev, xmask_dev, y_dev, tokens_dev) = cPickle.load(handle)
 
-        filename = '%s/tst.features.%s.cpkl' % (data_dir, bert_type)
+        filename = '%s/tst.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
             (xid_tst, xseg_tst, xmask_tst, y_gold, tokens_tst) = cPickle.load(handle)
+
 
     # n_class = max(y_trn)+1
     n_class = max(y_dev)+1
 
     with Timer('loading from checkpt...'):
-        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class)
+        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class, n_seq=128)
     model.summary(line_length=120)
 
     y_dev = keras.utils.to_categorical(y_dev, n_class)
@@ -50,6 +51,7 @@ def run(basepath, bert_type, task):
     # xseg_dev = xseg_dev[:12]
     # xmask_dev = xmask_dev[:12]
     # y_dev = y_dev[:12]
+    exit()
     model.load_weights(filename)
     acc_dev = model.evaluate([xid_dev, xseg_dev, xmask_dev], y_dev)
     acc_tst = model.evaluate([xid_tst, xseg_tst, xmask_tst], y_tst)
