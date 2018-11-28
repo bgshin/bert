@@ -76,7 +76,7 @@ def run(basepath, bert_type, task, seq_len):
 
         filename = '%s/tst.features.s%d.%s.cpkl' % (data_dir, seq_len, bert_type)
         with open(filename, 'rb') as handle:
-            (xid_tst, xseg_tst, xmask_tst, y_gold, tokens_tst) = cPickle.load(handle)
+            (xid_tst, xseg_tst, xmask_tst, y_tst, tokens_tst) = cPickle.load(handle)
 
     # n_class = max(y_trn)+1
     n_class = max(y_dev)+1
@@ -87,7 +87,7 @@ def run(basepath, bert_type, task, seq_len):
 
     # y_trn = keras.utils.to_categorical(y_trn, n_class)
     # y_dev = keras.utils.to_categorical(y_dev, n_class)
-    # y_tst = keras.utils.to_categorical(y_gold, n_class)
+    # y_tst = keras.utils.to_categorical(y_tst, n_class)
 
 
 
