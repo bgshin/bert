@@ -22,13 +22,45 @@ class Timer(object):
         print 'Elapsed: %s' % (time.time() - self.tstart)
 
 
+class MyCallback(ModelCheckpoint):
+    def __init__(self, filepath, data):
+        super(MyCallback, self).__init__(filepath, save_weights_only=True)
+        self.x_dev, self.y_dev, self.x_tst, self.y_tst = data
+
+        # self.real_save = real_save
+        self.filepath_template = self.filepath+'-%s'
+        self.acc_tst = 0
+        self.best_epoch = 0
+        self.acc_dev = 0
+        self.filepath = filepath
+
+    def print_status(self):
+        print('\n======================= [Best tst_acc (%f) (epoch = %d)] dev_acc =%f =============='
+              % (self.acc_tst, self.best_epoch, self.acc_dev))
+
+
+    def on_train_end(self, logs=None):
+        print('[Best:on_train_end]')
+        self.print_status()
+
+    def on_epoch_end(self, epoch, logs=None):
+    # def on_batch_end(self, batch, logs=None):
+        acc_dev = self.model.evaluate(self.x_dev, self.y_dev)
+        acc_tst = self.model.evaluate(self.x_tst, self.y_tst)
+
+        if self.acc_dev < acc_dev:
+            self.acc_dev = acc_dev
+            self.acc_tst = acc_tst
+            self.best_epoch = 1
+            self.model.save_weights(self.filepath, overwrite=True)
+
+
+
 def run(basepath, bert_type, task):
     data_dir = '%s/glue_data/%s' % (basepath, task)
     bert_dir = '%s/%s' % (basepath, bert_type)
     config_path = '%s/bert_config.json' % bert_dir
     checkpoint_path = '%s/bert_model.ckpt' % bert_dir
-    vocab_path =  '%s/vocab.txt' % bert_dir
-    do_lower_case = True if bert_type.split('_')[0] == 'uncased' else False
 
     with Timer('laod dataset...'):
         filename = '%s/trn.features.%s.cpkl' % (data_dir, bert_type)
@@ -54,22 +86,30 @@ def run(basepath, bert_type, task):
     y_dev = keras.utils.to_categorical(y_dev, n_class)
     y_tst = keras.utils.to_categorical(y_gold, n_class)
 
+
+
+    filename = "%s/finetune.%s.kmodel" % (data_dir, bert_type)
+    # xid_dev = xid_dev[:12]
+    # xseg_dev = xseg_dev[:12]
+    # xmask_dev = xmask_dev[:12]
+    # y_dev = y_dev[:12]
+
+    # data = [xid_dev, xseg_dev, xmask_dev], y_dev, [xid_dev, xseg_dev, xmask_dev], y_dev
+    data = [xid_dev, xseg_dev, xmask_dev], y_dev, [xid_tst, xseg_tst, xmask_tst], y_tst
+    callbacks_list = [MyCallback(filename, data)]
+
+
     # model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
     #           batch_size=6,
-    #           epochs=50)
-
-    filename = "%s/k-%s-{epoch:02d}-{val_acc:.2f}.hdf5" % (data_dir, bert_type)
-    checkpoint = ModelCheckpoint(filename, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    callbacks_list = [checkpoint]
+    #           epochs=2,
+    #           callbacks=callbacks_list
+    #           )
 
     model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
               batch_size=6,
               epochs=50,
-              validation_data=([xid_dev, xseg_dev, xmask_dev], y_dev),
               callbacks=callbacks_list
               )
-
-
 
 
 if __name__=='__main__':

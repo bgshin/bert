@@ -98,14 +98,14 @@ def get_model(token_num,
     pred_layer = keras.layers.Dense(
         units=n_class,
         activation='softmax',
-        name='LOSS',
+        name='Loss',
     )(pooled_layer)
 
     model = keras.models.Model(inputs=inputs, outputs=pred_layer)
     model.compile(
         optimizer=keras.optimizers.Adam(lr=lr),
         loss='sparse_categorical_crossentropy',
-        metrics=['accuracy'],
+        metrics=['accuracy']
     )
     return model
 
