@@ -20,7 +20,7 @@ class Timer(object):
             print '[%s]' % self.name,
         print 'Elapsed: %s' % (time.time() - self.tstart)
 
-def run(basepath, bert_type, task):
+def run(basepath, bert_type, task, seq_len):
     data_dir = '%s/glue_data/%s' % (basepath, task)
     bert_dir = '%s/%s' % (basepath, bert_type)
     config_path = '%s/bert_config.json' % bert_dir
@@ -70,6 +70,7 @@ if __name__=='__main__':
     parser.add_argument('-b', default='cased_L-12_H-768_A-12',
                         choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16']) # bert model type
     parser.add_argument('-g', default='0')  # gpunum
+    parser.add_argument('-s', default=128, type=int)  # seqlen
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.g
@@ -84,4 +85,4 @@ if __name__=='__main__':
     ktf.set_session(get_session())
 
 
-    run(args.p, args.b, args.t)
+    run(args.p, args.b, args.t, args.s)
