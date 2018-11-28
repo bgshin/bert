@@ -83,7 +83,7 @@ def run(basepath, bert_type, task, seq_len):
     n_class = max(y_dev)+1
 
     with Timer('loading from checkpt...'):
-        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class)
+        model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class, n_seq=seq_len)
     model.summary(line_length=120)
 
     y_trn = keras.utils.to_categorical(y_trn, n_class)
