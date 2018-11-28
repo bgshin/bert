@@ -38,7 +38,6 @@ class MyCallback(ModelCheckpoint):
         print('\n======================= [Best tst_acc (%f) (epoch = %d)] dev_acc =%f =============='
               % (self.acc_tst, self.best_epoch, self.acc_dev))
 
-
     def on_train_end(self, logs=None):
         print('[Best:on_train_end]')
         self.print_status()
@@ -86,9 +85,9 @@ def run(basepath, bert_type, task, seq_len):
         model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True, n_class=n_class, n_seq=seq_len)
     model.summary(line_length=120)
 
-    y_trn = keras.utils.to_categorical(y_trn, n_class)
-    y_dev = keras.utils.to_categorical(y_dev, n_class)
-    y_tst = keras.utils.to_categorical(y_gold, n_class)
+    # y_trn = keras.utils.to_categorical(y_trn, n_class)
+    # y_dev = keras.utils.to_categorical(y_dev, n_class)
+    # y_tst = keras.utils.to_categorical(y_gold, n_class)
 
 
 
