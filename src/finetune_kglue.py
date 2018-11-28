@@ -44,9 +44,11 @@ class MyCallback(ModelCheckpoint):
         self.print_status()
 
     def on_epoch_end(self, epoch, logs=None):
-    # def on_batch_end(self, batch, logs=None):
         acc_dev = self.model.evaluate(self.x_dev, self.y_dev)
         acc_tst = self.model.evaluate(self.x_tst, self.y_tst)
+
+        print('\n======================= [current tst_acc (%f)] dev_acc =%f =============='
+              % (acc_tst, acc_dev))
 
         if self.acc_dev < acc_dev:
             self.acc_dev = acc_dev
@@ -54,6 +56,8 @@ class MyCallback(ModelCheckpoint):
             self.best_epoch = 1
             self.model.save_weights(self.filepath, overwrite=True)
 
+            print('updated!!!')
+            self.print_status()
 
 
 def run(basepath, bert_type, task):
