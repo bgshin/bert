@@ -43,8 +43,8 @@ class MyCallback(ModelCheckpoint):
         self.print_status()
 
     def on_epoch_end(self, epoch, logs=None):
-        acc_dev = self.model.evaluate(self.x_dev, self.y_dev)
-        acc_tst = self.model.evaluate(self.x_tst, self.y_tst)
+        acc_dev = self.model.evaluate(self.x_dev, self.y_dev)[1]
+        acc_tst = self.model.evaluate(self.x_tst, self.y_tst)[1]
 
         print('\n======================= [current tst_acc (%f)] dev_acc =%f =============='
               % (acc_tst, acc_dev))
@@ -102,17 +102,17 @@ def run(basepath, bert_type, task, seq_len):
     callbacks_list = [MyCallback(filename, data)]
 
 
-    # model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
-    #           batch_size=6,
-    #           epochs=2,
-    #           callbacks=callbacks_list
-    #           )
-
-    model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
+    model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
               batch_size=6,
-              epochs=50,
+              epochs=2,
               callbacks=callbacks_list
               )
+
+    # model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
+    #           batch_size=6,
+    #           epochs=50,
+    #           callbacks=callbacks_list
+    #           )
 
 
 if __name__=='__main__':
