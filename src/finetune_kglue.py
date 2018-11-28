@@ -102,17 +102,17 @@ def run(basepath, bert_type, task, seq_len):
     callbacks_list = [MyCallback(filename, data)]
 
 
-    model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
-              batch_size=6,
-              epochs=2,
-              callbacks=callbacks_list
-              )
-
-    # model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
+    # model.fit([xid_dev, xseg_dev, xmask_dev], y_dev,
     #           batch_size=6,
-    #           epochs=50,
+    #           epochs=2,
     #           callbacks=callbacks_list
     #           )
+
+    model.fit([xid_trn, xseg_trn, xmask_trn], y_trn,
+              batch_size=6,
+              epochs=50,
+              callbacks=callbacks_list
+              )
 
 
 if __name__=='__main__':
