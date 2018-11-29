@@ -212,7 +212,7 @@ if __name__=='__main__':
     parser.add_argument('-p', default='../data')  # base path
     parser.add_argument('-b', default='uncased_L-24_H-1024_A-16',
                         choices=['cased_L-12_H-768_A-12', 'uncased_L-24_H-1024_A-16'])  # bert model type
-    parser.add_argument('-m', default=0, type=int)  # base path
+    parser.add_argument('-m', default=0, type=int)  # type0: softmax mse, type1: gold cross entrophy
     parser.add_argument('-g', default='1')  # gpunum
     args = parser.parse_args()
 

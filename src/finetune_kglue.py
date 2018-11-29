@@ -52,7 +52,7 @@ class MyCallback(ModelCheckpoint):
         if self.acc_dev < acc_dev:
             self.acc_dev = acc_dev
             self.acc_tst = acc_tst
-            self.best_epoch = 1
+            self.best_epoch = epoch
             self.model.save_weights(self.filepath, overwrite=True)
 
             print('updated!!!')
