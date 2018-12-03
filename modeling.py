@@ -295,7 +295,8 @@ class BertDistillModel(object):
                input_mask=None,
                token_type_ids=None,
                use_one_hot_embeddings=True,
-               scope=None):
+               scope=None,
+               distill_dim=12*8):
     """Constructor for BertModel.
 
     Args:
@@ -341,13 +342,21 @@ class BertDistillModel(object):
             word_embedding_name="word_embeddings",
             use_one_hot_embeddings=use_one_hot_embeddings)
 
-        self.embedding_output = tf.layers.dense(
-            self.embedding_output,
-            config.hidden_size,
-            activation=tf.tanh,
-            kernel_initializer=create_initializer(config.initializer_range))
+        with tf.variable_scope("distill-1"):
+            self.embedding_output = tf.layers.dense(
+                self.embedding_output,
+                config.hidden_size,
+                activation=tf.tanh,
+                kernel_initializer=create_initializer(config.initializer_range))
 
+        with tf.variable_scope("distill-2"):
+            self.embedding_output = tf.layers.dense(
+                self.embedding_output,
+                distill_dim,
+                activation=tf.tanh,
+                kernel_initializer=create_initializer(config.initializer_range))
 
+      with tf.variable_scope("emb-distill"):
         # Add positional embeddings and token type embeddings, then layer
         # normalize and perform dropout.
         self.embedding_output = embedding_postprocessor(
@@ -362,7 +371,7 @@ class BertDistillModel(object):
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
 
-      with tf.variable_scope("encoder"):
+      with tf.variable_scope("encoder-distill"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
         # mask of shape [batch_size, seq_length, seq_length] which is used
         # for the attention scores.
@@ -374,10 +383,10 @@ class BertDistillModel(object):
         self.all_encoder_layers = transformer_model(
             input_tensor=self.embedding_output,
             attention_mask=attention_mask,
-            hidden_size=config.hidden_size,
+            hidden_size=distill_dim,
             num_hidden_layers=config.num_hidden_layers,
             num_attention_heads=config.num_attention_heads,
-            intermediate_size=config.intermediate_size,
+            intermediate_size=distill_dim*4,
             intermediate_act_fn=get_activation(config.hidden_act),
             hidden_dropout_prob=config.hidden_dropout_prob,
             attention_probs_dropout_prob=config.attention_probs_dropout_prob,
@@ -390,13 +399,13 @@ class BertDistillModel(object):
       # [batch_size, hidden_size]. This is necessary for segment-level
       # (or segment-pair-level) classification tasks where we need a fixed
       # dimensional representation of the segment.
-      with tf.variable_scope("pooler"):
+      with tf.variable_scope("pooler-distill"):
         # We "pool" the model by simply taking the hidden state corresponding
         # to the first token. We assume that this has been pre-trained
         first_token_tensor = tf.squeeze(self.sequence_output[:, 0:1, :], axis=1)
         self.pooled_output = tf.layers.dense(
             first_token_tensor,
-            config.hidden_size,
+            distill_dim,
             activation=tf.tanh,
             kernel_initializer=create_initializer(config.initializer_range))
 
